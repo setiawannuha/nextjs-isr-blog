@@ -4,24 +4,19 @@ import { useRouter } from 'next/router'
 import {Container, Typography, Box, IconButton} from "@mui/material"
 import Image from 'next/image'
 import { WhatsApp, Facebook, AccountCircle, Instagram, Twitter } from '@mui/icons-material'
-import {useDetailBlogQuery} from "@/query/blog"
 import {IResponse, IResponseDetail} from "@/types/blog"
-import { UseQueryResult, dehydrate, QueryClient } from "@tanstack/react-query"
+import { dehydrate, QueryClient, useQueryClient } from "@tanstack/react-query"
 import { GetStaticProps, GetStaticPaths } from 'next'
 import {fetchDetailBlog, fetchBlog} from "@/services/blog"
 
 const DetailBlog = () => {
   const router = useRouter()
   const id = router.query.id as string
-  const { data, isError, isLoading, error }: UseQueryResult<IResponseDetail, unknown> = useDetailBlogQuery(id)
-  if (isLoading) {
+  const queryClient = useQueryClient();
+  const data: IResponseDetail | undefined = queryClient.getQueryData(['blog-detail', id]);
+  if(!data){
     return <Box display={'flex'} justifyContent={'center'} alignItems={'center'} height={100}>
-      Loading...
-    </Box>;
-  }
-  if (isError) {
-    return <Box display={'flex'} justifyContent={'center'} alignItems={'center'} height={100}>
-      Error: {error instanceof Error  ? error.message : 'An error occurred'}
+      An error occurred
     </Box>;
   }
   return (

@@ -3,29 +3,24 @@ import {ChangeEvent, useState, useEffect} from 'react'
 import {Grid, Box, Container, Button, Input} from "@mui/material"
 import Navbar from "@/components/navbar/Navbar"
 import Card from '@/components/card/Card'
-import {useBlogQuery} from '@/query/blog'
 import {fetchBlog} from '@/services/blog'
 import {IResponse, IBlog} from "@/types/blog"
-import { UseQueryResult, dehydrate, QueryClient } from "@tanstack/react-query"
+import { dehydrate, QueryClient, useQueryClient } from "@tanstack/react-query"
 import { GetStaticProps } from 'next'
 
 const Blog = () => {
+  const queryClient = useQueryClient();
+  const data: IResponse | undefined = queryClient.getQueryData(['blog']);
   const [search, setSearch] = useState('')
   const [blogs, setBlogs] = useState<IBlog[]>([])
-  const { data, isError, isLoading, error }: UseQueryResult<IResponse, unknown> = useBlogQuery()
   useEffect(() => {
     if(data){
       setBlogs(data.blogs)
     }
   }, [data])
-  if (isLoading) {
+  if(!data){
     return <Box display={'flex'} justifyContent={'center'} alignItems={'center'} height={100}>
-      Loading...
-    </Box>;
-  }
-  if (isError) {
-    return <Box display={'flex'} justifyContent={'center'} alignItems={'center'} height={100}>
-      Error: {error instanceof Error  ? error.message : 'An error occurred'}
+      An error occurred
     </Box>;
   }
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
